@@ -116,7 +116,6 @@ def remove_ellipses(words):
 
 raw['remove_ellipses'] = raw['remove_digits'].apply(remove_ellipses)
 
-test = raw['cleaned']
 data['cleaned'] = raw['remove_ellipses']
 
 data.to_csv('/Users/admin/Downloads/DSA4263/preprocessed_draft1.csv')
