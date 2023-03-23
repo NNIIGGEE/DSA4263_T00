@@ -63,6 +63,8 @@ def convert_strings(words):
 
     return converted_words
 
+raw['converted_strings'] = raw['removed_short_word'].apply(convert_strings)
+
 #remove contractions
 def remove_contractions(words):
     contractions = ["'re", "'ve", "'d", "'m", "'ll", "n't"]
