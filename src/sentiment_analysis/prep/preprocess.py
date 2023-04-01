@@ -5,7 +5,7 @@ from nltk.tokenize import word_tokenize
 from nltk.tokenize import TweetTokenizer
 import string
 import re
-
+from sklearn.preprocessing import LabelEncoder
 
 def lemmatize_text(text):
     lemmatizer = nltk.stem.WordNetLemmatizer()
@@ -113,6 +113,10 @@ def clean_data(path):
     raw['remove_ellipses'] = raw['remove_digits'].apply(remove_ellipses)
 
     data['cleaned'] = raw['remove_ellipses']
+    
+    data['cleaned2'] = data['cleaned'].apply(lambda x: ' '.join(x))
+    le = LabelEncoder()
+    data["label"] = le.fit_transform(data["Sentiment"])
 
     return data
 
