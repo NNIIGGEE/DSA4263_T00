@@ -1,4 +1,3 @@
-### IMPORTS ###
 import pandas as pd
 import nltk
 nltk.download('wordnet')
@@ -16,12 +15,6 @@ import string
 import os
 import re
 from sklearn.preprocessing import LabelEncoder
-
-#%% DATA PREPROCESSING FUNCTIONS
-
-# Remove punctuation
-punctuations = list(string.punctuation)
-punctuations.append('...')
 
 def remove_punctuation_word(word):
     '''
@@ -50,8 +43,30 @@ def remove_punctuation_word(word):
             
     lst.append(corrected_word)
     new_list = [x for x in lst if x != '']
-
     return new_list
+
+def remove_stopwords(words):
+    '''
+    Parameters
+    ----------
+    words : Takes in the list of tokens of each customer review.
+
+    Returns
+    -------
+    new_list : Returns a list of tokens with stopwords removed.
+
+    '''
+    stop_words = set(stopwords.words('english')) 
+    
+    new_list = []
+    for word in words:
+        if word not in stop_words:
+            new_list.append(word)
+    return new_list
+
+def lemmatize_text(text):
+    lemmatizer = nltk.stem.WordNetLemmatizer()
+    return [lemmatizer.lemmatize(w) for w in text]
 
 def remove_punctuation(words):
     '''
@@ -72,27 +87,6 @@ def remove_punctuation(words):
             new_list = new_list + new_word
     return new_list
 
-# Remove stopwords
-def remove_stopwords(words):
-    '''
-    Parameters
-    ----------
-    words : Takes in the list of tokens of each customer review.
-
-    Returns
-    -------
-    new_list : Returns a list of tokens with stopwords removed.
-
-    '''
-    stop_words = set(stopwords.words('english')) 
-    
-    new_list = []
-    for word in words:
-        if word not in stop_words:
-            new_list.append(word)
-    return new_list
-
-# Remove short length words
 def remove_short_words(words):
     '''
     Parameters
@@ -106,7 +100,6 @@ def remove_short_words(words):
     '''
     return [word for word in words if len(word) > 2]
 
-# Convert amazon.com to amazon
 def convert_strings(words):
     '''
     Parameters
@@ -127,7 +120,6 @@ def convert_strings(words):
 
     return converted_words
 
-# Remove contractions
 def remove_contractions(words):
     '''
     Parameters
@@ -151,7 +143,6 @@ def remove_contractions(words):
             new_words.append(word)
     return new_words
 
-# Remove URLs
 def remove_urls(words):
     '''
     Parameters
@@ -172,10 +163,8 @@ def remove_urls(words):
         if not url_pattern.match(word):
             # If it isn't a URL, append the word to the new list
             new_words.append(word)
-
     return new_words
 
-# Remove any remaining tokens containing digits or special characters
 def remove_digits(words):
     '''
     Parameters
@@ -193,11 +182,7 @@ def remove_digits(words):
     for word in words:
         if not pattern.match(word):
             clean_tokens.append(word)
-    
     return clean_tokens
-
-# Remove Typos
-word_list = set(words.words()) # Load the 'words' corpus from NLTK
 
 def remove_typos(tokens):
     '''
@@ -211,6 +196,7 @@ def remove_typos(tokens):
 
     '''
     clean_tokens = []
+    word_list = set(words.words())
     for token in tokens:
         if token in word_list:
             clean_tokens.append(token)
@@ -240,8 +226,7 @@ def get_wordnet_pos(treebank_tag):
         return 'r'
     else:
         return 'n'
-
-
+    
 def lemmatize_tokens(col):
     """
     Lemmatizes a list of tokens based on their part-of-speech (POS) tags.
@@ -262,10 +247,8 @@ def lemmatize_tokens(col):
         wn_pos_tag = get_wordnet_pos(pos_tag)
         lemma = lemmatizer.lemmatize(token, pos=wn_pos_tag)
         lemmas.append(lemma)
-
     return lemmas
 
-# Remove duplicates created from lemmatization
 def remove_duplicates(tokens):
     '''
     Parameters
@@ -279,9 +262,17 @@ def remove_duplicates(tokens):
     '''
     return list(set(tokens))
 
-#%% CLEAN DATA PIPELINE
-
 def clean_data(path):
+    '''
+    Parameters
+    ----------
+    path : Takes in path of raw data
+
+    Returns
+    -------
+    Cleaned preprocessed data
+
+    '''
     raw = pd.read_csv(path)
     
     # Lowercase all words
@@ -326,15 +317,8 @@ def clean_data(path):
     le = LabelEncoder()
     raw["label"] = le.fit_transform(raw["Sentiment"])
     
-    # FINAL DF
     final_df = raw[['label', 'Time', 'cleaned', 'Text']]
-    final_df.to_csv('../datasets/final_cleaned_tokens.csv')
-    
+    final_df['cleaned2'] = final_df['cleaned'].apply(lambda x: ' '.join(x))
+
     return final_df
-
-# %% RUN PREPROCESSING PIPELINE
-path = "../datasets/reviews.csv" 
-final_df = clean_data(path)
-
-
 
