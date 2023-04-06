@@ -1,10 +1,10 @@
 ### IMPORTS ###
 import pandas as pd
 import nltk
-# nltk.download('wordnet')
-# nltk.download('stopwords')
-# nltk.download('averaged_perceptron_tagger')
-# nltk.download('words')
+nltk.download('wordnet')
+nltk.download('stopwords')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('words')
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
@@ -15,24 +15,9 @@ from nltk.corpus import wordnet
 import string
 import os
 import re
+from sklearn.preprocessing import LabelEncoder
 
-#%% READ IN RAW CSV FILE
-path = "../datasets/reviews.csv" 
-raw = pd.read_csv(path)
-
-
-#%% DATA PREPROCESSING 
-
-# Lowercase all words
-raw['Text'] = raw['Text'].apply(str.lower)
-
-# Remove stopwords using NLTK
-stop_words = set(stopwords.words('english')) 
-raw['no_stopwords'] = raw['Text'].apply(lambda x: ' '.join([word for word in x.split() if word not in (stop_words)]))
-
-# Tokenize text
-tokenizer = TweetTokenizer()
-raw['tokens'] = raw['no_stopwords'].apply(tokenizer.tokenize)
+#%% DATA PREPROCESSING FUNCTIONS
 
 # Remove punctuation
 punctuations = list(string.punctuation)
@@ -52,7 +37,7 @@ def remove_punctuation_word(word):
     lst = []
     corrected_word=""
     for i, char in enumerate(word):
-        if (i!=0 and i!=(len(word)-1) and char == '-' and word[i+1] not in string.punctuation):
+        if (i!=0 and i!=(len(word)-1) and char == '-' and (word[i+1] not in string.punctuation) and (word[i-1] not in string.punctuation)):
             corrected_word+=char
             
         elif char in string.punctuation:
@@ -67,8 +52,6 @@ def remove_punctuation_word(word):
     new_list = [x for x in lst if x != '']
 
     return new_list
-
-remove_punctuation_word('made-in-the-usa')
 
 def remove_punctuation(words):
     '''
@@ -89,7 +72,25 @@ def remove_punctuation(words):
             new_list = new_list + new_word
     return new_list
 
-raw['no_punc_1'] = raw['tokens'].apply(remove_punctuation)
+# Remove stopwords
+def remove_stopwords(words):
+    '''
+    Parameters
+    ----------
+    words : Takes in the list of tokens of each customer review.
+
+    Returns
+    -------
+    new_list : Returns a list of tokens with stopwords removed.
+
+    '''
+    stop_words = set(stopwords.words('english')) 
+    
+    new_list = []
+    for word in words:
+        if word not in stop_words:
+            new_list.append(word)
+    return new_list
 
 # Remove short length words
 def remove_short_words(words):
@@ -105,10 +106,18 @@ def remove_short_words(words):
     '''
     return [word for word in words if len(word) > 2]
 
-raw['removed_short_word_2'] = raw['no_punc_1'].apply(remove_short_words)
-
 # Convert amazon.com to amazon
 def convert_strings(words):
+    '''
+    Parameters
+    ----------
+    words : Takes in the list of tokens of each customer review.
+
+    Returns
+    -------
+    new_list : Returns a list of tokens with "amazon.com" converted to just "amazon".
+
+    '''
     converted_words = []
     for word in words:
         if word == 'amazon.com':
@@ -117,8 +126,6 @@ def convert_strings(words):
             converted_words.append(word)
 
     return converted_words
-
-raw['converted_strings_3'] = raw['removed_short_word_2'].apply(convert_strings)
 
 # Remove contractions
 def remove_contractions(words):
@@ -144,8 +151,6 @@ def remove_contractions(words):
             new_words.append(word)
     return new_words
 
-raw['remove_contractions_4'] = raw['converted_strings_3'].apply(remove_contractions)
-
 # Remove URLs
 def remove_urls(words):
     '''
@@ -170,8 +175,6 @@ def remove_urls(words):
 
     return new_words
 
-raw['remove_urls_5'] = raw['remove_contractions_4'].apply(remove_urls)
-
 # Remove any remaining tokens containing digits or special characters
 def remove_digits(words):
     '''
@@ -193,9 +196,7 @@ def remove_digits(words):
     
     return clean_tokens
 
-raw['remove_digits_6'] = raw['remove_urls_5'].apply(remove_digits)
-
-"""# Remove Typos
+# Remove Typos
 word_list = set(words.words()) # Load the 'words' corpus from NLTK
 
 def remove_typos(tokens):
@@ -214,11 +215,6 @@ def remove_typos(tokens):
         if token in word_list:
             clean_tokens.append(token)
     return clean_tokens
-
-raw['remove_typos_7'] = raw['remove_digits_6'].apply(remove_typos)"""
-
-# Lemmatization 
-raw['pos_tags'] = raw['remove_digits_6'].apply(nltk.pos_tag) # POSTAG the tokens with NLTK for lemmatization
 
 def get_wordnet_pos(treebank_tag):
     """
@@ -269,8 +265,6 @@ def lemmatize_tokens(col):
 
     return lemmas
 
-raw['lemmatized'] = raw.apply(lambda row: lemmatize_tokens(row['pos_tags']), axis=1)
-
 # Remove duplicates created from lemmatization
 def remove_duplicates(tokens):
     '''
@@ -285,10 +279,62 @@ def remove_duplicates(tokens):
     '''
     return list(set(tokens))
 
-raw['cleaned'] = raw['lemmatized'].apply(remove_duplicates)
+#%% CLEAN DATA PIPELINE
 
-# %% OUTPUT TOKENS
+def clean_data(path):
+    raw = pd.read_csv(path)
+    
+    # Lowercase all words
+    raw['Text'] = raw['Text'].apply(str.lower)
 
-final_df = raw[['Sentiment', 'Time', 'cleaned', 'Text']]
-final_df.to_csv('../datasets/final_cleaned_tokens.csv')
+    # Tokenize text
+    tokenizer = TweetTokenizer()
+    raw['tokens'] = raw['Text'].apply(tokenizer.tokenize)
+    
+    # Remove Punctuation
+    raw['no_punc_1'] = raw['tokens'].apply(remove_punctuation)
+    
+    # Remove stopwords using NLTK
+    raw['no_stopwords_2'] = raw['no_punc_1'].apply(remove_stopwords)
+    
+    # Remove short words
+    raw['removed_short_word_3'] = raw['no_stopwords_2'].apply(remove_short_words)
+    
+    # Convert Amazon Strings
+    raw['converted_strings_4'] = raw['removed_short_word_3'].apply(convert_strings)
+    
+    # Remove Contractions
+    raw['remove_contractions_5'] = raw['converted_strings_4'].apply(remove_contractions)
+    
+    # Remove URLs
+    raw['remove_urls_6'] = raw['remove_contractions_5'].apply(remove_urls)
+    
+    # Remove Digits 
+    raw['remove_digits_7'] = raw['remove_urls_6'].apply(remove_digits)
+    
+    # Remove Typos
+    # raw['remove_typos_8'] = raw['remove_digits_7'].apply(remove_typos)
+    
+    # Lemmatization (POSTAG)
+    raw['pos_tags'] = raw['remove_digits_7'].apply(nltk.pos_tag) # POSTAG the tokens with NLTK for lemmatization
+    raw['lemmatized'] = raw.apply(lambda row: lemmatize_tokens(row['pos_tags']), axis=1)
+    
+    # Remove duplicates from lemmatization
+    raw['cleaned'] = raw['lemmatized'].apply(remove_duplicates)
+    
+    # labels
+    le = LabelEncoder()
+    raw["label"] = le.fit_transform(raw["Sentiment"])
+    
+    # FINAL DF
+    final_df = raw[['label', 'Time', 'cleaned', 'Text']]
+    final_df.to_csv('../datasets/final_cleaned_tokens.csv')
+    
+    return final_df
+
+# %% RUN PREPROCESSING PIPELINE
+path = "../datasets/reviews.csv" 
+final_df = clean_data(path)
+
+
 
