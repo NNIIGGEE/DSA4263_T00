@@ -1,9 +1,5 @@
 import pandas as pd
 import nltk
-nltk.download('wordnet')
-nltk.download('stopwords')
-nltk.download('averaged_perceptron_tagger')
-nltk.download('words')
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
@@ -15,6 +11,17 @@ import string
 import os
 import re
 from sklearn.preprocessing import LabelEncoder
+import ssl
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    pass
+else:
+    ssl._create_default_https_context = _create_unverified_https_context
+nltk.download('wordnet')
+nltk.download('stopwords')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('words')
 
 def remove_punctuation_word(word):
     '''

@@ -1,9 +1,11 @@
 from sentiment_analysis.prep import preprocess
-from sentiment_analysis.train import evaluate, train_model
+# from sentiment_analysis.train import evaluate, train_model
 
+print("=========================CLEAN DATA=========================")
 data = preprocess.clean_data("../datasets/reviews.csv")
-print("=========================CLEANED DATA=========================")
+print("=========================DONE=========================")
 
-print("=========================TRAINING MODEL=========================")
-train_model.run_training(data)
-print("=========================TRAINING MODEL DONE=========================")
+
+# print("=========================TRAINING MODEL=========================")
+# train_model.run_lstm_training_full(data)
+# print("=========================DONE=========================")
