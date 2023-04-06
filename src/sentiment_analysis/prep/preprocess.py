@@ -22,6 +22,7 @@ nltk.download('wordnet')
 nltk.download('stopwords')
 nltk.download('averaged_perceptron_tagger')
 nltk.download('words')
+from sklearn.model_selection import train_test_split
 
 def remove_punctuation_word(word):
     '''
@@ -271,13 +272,15 @@ def remove_duplicates(tokens):
 
 def clean_data(path):
     '''
+    Performs preprocessing of the raw data
+
     Parameters
     ----------
     path : Takes in path of raw data
 
     Returns
     -------
-    Cleaned preprocessed data
+    Cleaned data in dataframe
 
     '''
     raw = pd.read_csv(path)
@@ -329,3 +332,18 @@ def clean_data(path):
 
     return final_df
 
+def split_data(data):
+    '''
+    split full data using train_test_split 
+
+    Parameters
+    ----------
+    data : cleaned dataframe with 5 columns
+
+    Returns
+    -------
+    4 dataframes
+    '''
+    X = data[['Time', 'cleaned', 'Text', 'cleaned2']]
+    x_train, x_test, y_train, y_test = train_test_split(X, data['label'], test_size=0.2, random_state = 42)
+    return x_train, x_test, y_train, y_test

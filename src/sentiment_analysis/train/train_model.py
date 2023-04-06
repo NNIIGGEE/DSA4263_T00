@@ -8,25 +8,30 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.preprocessing.text import Tokenizer
 
-def run_lstm_training(data):
+def run_lstm_training(x_train, x_test, y_train, y_test):
     '''
+    Trains LSTM model on partial dataset for comparison
+
     Parameters
     ----------
-    data : Takes in cleaned dataframe from preprocessing, data should have 5 columns -> label, time, cleaned, text and cleaned2
+    x_train, x_test, y_train, y_test: cleaned data that has been split
 
     Returns
     -------
-    No output. Simply trains the lstm model for sentiment analysis for comparison with other models and save trained model
+    Save trained model
     '''
 
     # Tokenize data
     tokenizer = Tokenizer(num_words=2000)
-    tokenizer.fit_on_texts(data['cleaned2'])
-    sequences = tokenizer.texts_to_sequences(data['cleaned2'])
+    tokenizer.fit_on_texts(x_train['cleaned2'])
+    sequences = tokenizer.texts_to_sequences(x_train['cleaned2'])
     padded_sequences = pad_sequences(sequences)
 
-    # train test split
-    x_train, x_test, y_train, y_test = train_test_split(padded_sequences, data['label'], test_size=0.2, random_state = 42)
+    tokenizer2 = Tokenizer(num_words=2000)
+    tokenizer2.fit_on_texts(x_test['cleaned2'])
+    sequences2 = tokenizer2.texts_to_sequences(x_test['cleaned2'])
+    padded_sequences2 = pad_sequences(sequences2)
+
 
     # Build RNN model
     model = tf.keras.Sequential([
@@ -39,23 +44,25 @@ def run_lstm_training(data):
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
     # Train the model
-    model.fit(x_train, y_train, epochs=10, batch_size=128, validation_data=(x_test, y_test))
-    filename = "lstm_compare_SA.pkl"
+    model.fit(padded_sequences, y_train, epochs=10, batch_size=128, validation_data=(padded_sequences2, y_test))
+    filename = "lstm_partial_SA.pkl"
     path = "../trained_models/" + filename
     joblib.dump(model, path)
 
-    print("Model Saved")
+    print("You can find trained model in trained_models")
 
 
 def run_lstm_training_full(data):
     '''
+    Trains LSTM model with full dataset
+
     Parameters
     ----------
-    data : Takes in cleaned dataframe from preprocessing, data should have 5 columns -> label, time, cleaned, text and cleaned2
+    data : Takes in cleaned dataframe, data should have 5 columns -> label, time, cleaned, text and cleaned2
 
     Returns
     -------
-    No output. Simply trains the lstm model for sentiment analysis on full data
+    Save trained model
     '''
 
     # Tokenize data
@@ -63,9 +70,6 @@ def run_lstm_training_full(data):
     tokenizer.fit_on_texts(data['cleaned2'])
     sequences = tokenizer.texts_to_sequences(data['cleaned2'])
     padded_sequences = pad_sequences(sequences)
-
-    # train test split
-    x_train, x_test, y_train, y_test = train_test_split(padded_sequences, data['label'], test_size=0.2, random_state = 42)
 
     # Build RNN model
     model = tf.keras.Sequential([
@@ -78,12 +82,12 @@ def run_lstm_training_full(data):
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
     # Train the model
-    model.fit(x_train, y_train, epochs=10, batch_size=128, validation_data=(x_test, y_test))
+    model.fit(padded_sequences, data['label'], epochs=10, batch_size=128, validation_split=0.2)
     filename = "lstm_full_SA.pkl"
     path = "../trained_models/" + filename
     joblib.dump(model, path)
 
-    print("Model Saved")
+    print("You can find trained model in trained_models")
 
 
 
