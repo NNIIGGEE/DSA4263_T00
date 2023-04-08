@@ -15,6 +15,10 @@ print("=========================TRAINING MODEL FOR COMPARISON===================
 train_model.run_lstm_training(x_train, x_test, y_train, y_test)
 print("=========================DONE=========================")
 
+print("=========================EVALUATING MODEL=========================")
+
+print("=========================DONE=========================")
+
 print("==========================TRAINING BEST MODELS (FULL DATA)==========================")
 train_model.run_lstm_training_full(data)
 print("==========================DONE==========================")
