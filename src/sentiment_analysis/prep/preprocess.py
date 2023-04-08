@@ -270,13 +270,14 @@ def remove_duplicates(tokens):
     '''
     return list(set(tokens))
 
-def clean_data(path):
+def clean_data(path, type):
     '''
     Performs preprocessing of the raw data
 
     Parameters
     ----------
     path : Takes in path of raw data
+    type : Training data or Test data (reviews_test.csv)
 
     Returns
     -------
@@ -323,12 +324,16 @@ def clean_data(path):
     # Remove duplicates from lemmatization
     raw['cleaned'] = raw['lemmatized'].apply(remove_duplicates)
     
-    # labels
-    le = LabelEncoder()
-    raw["label"] = le.fit_transform(raw["Sentiment"])
-    
-    final_df = raw[['label', 'Time', 'cleaned', 'Text']]
-    final_df['cleaned2'] = final_df['cleaned'].apply(lambda x: ' '.join(x))
+    if type == "training":
+        # labels
+        le = LabelEncoder()
+        raw["label"] = le.fit_transform(raw["Sentiment"])
+        
+        final_df = raw[['label', 'Time', 'cleaned', 'Text']]
+        final_df['cleaned2'] = final_df['cleaned'].apply(lambda x: ' '.join(x))
+    else:
+        final_df = raw[['Time', 'cleaned', 'Text']]
+        final_df['cleaned2'] = final_df['cleaned'].apply(lambda x: ' '.join(x))
 
     return final_df
 

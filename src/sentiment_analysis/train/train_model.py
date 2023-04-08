@@ -33,7 +33,7 @@ def run_lstm_training(x_train, x_test, y_train, y_test):
     padded_sequences2 = pad_sequences(sequences2)
 
 
-    # Build RNN model
+    # Build LSTM model
     model = tf.keras.Sequential([
         tf.keras.layers.Embedding(2000, 64),
         tf.keras.layers.LSTM(32),
@@ -71,7 +71,7 @@ def run_lstm_training_full(data):
     sequences = tokenizer.texts_to_sequences(data['cleaned2'])
     padded_sequences = pad_sequences(sequences)
 
-    # Build RNN model
+    # Build LSTM model
     model = tf.keras.Sequential([
         tf.keras.layers.Embedding(2000, 64),
         tf.keras.layers.LSTM(32),
