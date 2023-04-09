@@ -73,10 +73,9 @@ def get_lstm_score(x_test):
 
     model = joblib.load("../trained_models/lstm_partial_SA.pkl")
     predicted = model.predict(padded_sequences)
-    x_test['predicted'] = predicted.round()
-    return x_test
-
-
+    final_df = x_test[['Time', 'Text', 'cleaned2']]
+    final_df['predicted'] = predicted.round()
+    return final_df
 
 def convert_score(row):
     '''
@@ -110,9 +109,10 @@ def get_vader_score(x_test):
     dataframe with predicted values
     '''
     model = SentimentIntensityAnalyzer()
-    x_test["predicted"] = x_test["cleaned2"].apply(lambda x: model.polarity_scores(x))
-    x_test["predicted"] = x_test["predicted"].apply(lambda row: convert_score(row))
-    return x_test
+    final_df = x_test[['Time', 'Text', 'cleaned2']]
+    final_df["predicted_polarity"] = final_df["cleaned2"].apply(lambda x: model.polarity_scores(x))
+    final_df["predicted"] = final_df["predicted_polarity"].apply(lambda row: convert_score(row))
+    return final_df
 
 def evaluate(predicted, y_test):
     '''
