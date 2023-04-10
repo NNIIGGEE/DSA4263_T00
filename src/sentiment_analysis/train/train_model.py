@@ -42,7 +42,7 @@ def run_lstm_training(x_train, x_test, y_train, y_test):
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
     # Train the model
-    model.fit(padded_sequences, y_train, epochs=5, batch_size=128, validation_data=(padded_sequences2, y_test))
+    model.fit(padded_sequences, y_train, epochs=10, batch_size=128, validation_data=(padded_sequences2, y_test))
     filename = "lstm_partial_SA.pkl"
     path = "../trained_models/" + filename
     joblib.dump(model, path)
@@ -80,7 +80,7 @@ def run_lstm_training_full(data):
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
     # Train the model
-    model.fit(padded_sequences, data['label'], epochs=5, batch_size=128, validation_split=0.2)
+    model.fit(padded_sequences, data['label'], epochs=10, batch_size=128, validation_split=0.2)
     filename = "lstm_full_SA.pkl"
     path = "../trained_models/" + filename
     joblib.dump(model, path)
