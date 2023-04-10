@@ -66,7 +66,7 @@ def get_lstm_score(x_test):
     -------
     dataframe with predicted values
     '''
-    tokenizer = Tokenizer(num_words=10000)
+    tokenizer = Tokenizer(num_words=10971)
     tokenizer.fit_on_texts(x_test['cleaned2'])
     sequences = tokenizer.texts_to_sequences(x_test['cleaned2'])
     padded_sequences = pad_sequences(sequences, maxlen=100)
