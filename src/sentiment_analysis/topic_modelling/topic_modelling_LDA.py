@@ -25,15 +25,11 @@ def positive_LDA_topic_modelling(df_positive):
     # in the whole dataset
     bigram = gensim.models.Phrases(tokens, min_count=2, threshold=100)
     bigram_mod = gensim.models.phrases.Phraser(bigram)
+    
     # including bigrams as tokens 
     sents = [ bigram_mod[token] for token in tokens]
     # Create Dictionary to keep track of vocab
     dct = corpora.Dictionary(tokens)
-
-    # no_below= 30
-    # filter the words that occure in less than 20 documents and in more the 30% of documents
-    #dct.filter_extremes(no_below= 20, no_above = 0.3)
-    #print('Unique words after filtering', len(dct))
 
     # Create Corpus(Database)
     corpus = [dct.doc2bow(sent) for sent in sents]
@@ -43,7 +39,9 @@ def positive_LDA_topic_modelling(df_positive):
 
     #randomstate = 12
     scores = []
-    for k in range(3,15):
+    print("Coherence Score for Each Topic for Positive Sentiment")
+    
+    for k in range(3,10):
         # LDA model
         lda_model = gensim.models.LdaModel(corpus=corpus_tfidf, num_topics=k, 
                                                     id2word=dct, random_state=12)
@@ -63,7 +61,7 @@ def positive_LDA_topic_modelling(df_positive):
     pyLDAvis.enable_notebook()
     results = pyLDAvis.gensim_models.prepare(lda_model, corpus_tfidf, dct, sort_topics=False)
     pyLDAvis.save_html(results, 'ldavis_english' +'.html')
-    results
+    #results
 
     top_words_df = pd.DataFrame()
     for k in range(selected_topics):
@@ -72,7 +70,9 @@ def positive_LDA_topic_modelling(df_positive):
         
         # only keep the word and discard the weight
         top_words_df['Topic {}'.format(k)] = [pair[0] for pair in top_words]
-
+    print("Top Words for Each Positive Topics")
+    print(top_words_df)
+    
     predicted_topics = lda_model[corpus_tfidf]
 
     # Extract the predicted topic for each document
@@ -83,6 +83,7 @@ def positive_LDA_topic_modelling(df_positive):
     df_positive['Topics'] = predicted_topics
     return df_positive
 
+
 """ --- NEGATIVE --- """
 
 def negative_LDA_topic_modelling(df_negative):
@@ -92,7 +93,7 @@ def negative_LDA_topic_modelling(df_negative):
     for sentence in df_negative['cleaned']:
         tokens.append(ast.literal_eval(sentence))
 
-            # training a bi gram model in order to include those bigrams as tokens who occured at least 6 times
+        # training a bi gram model in order to include those bigrams as tokens who occured at least 6 times
         # in the whole dataset
         bigram = gensim.models.Phrases(tokens, min_count=2, threshold=100)
         bigram_mod = gensim.models.phrases.Phraser(bigram)
@@ -112,7 +113,9 @@ def negative_LDA_topic_modelling(df_negative):
 
     #randomstate = 12
     scores = []
-    for k in range(3,15):
+    print("Coherence Score for Each Topic for Negative Sentiment")
+
+    for k in range(3,10):
         # LDA model
         lda_model = gensim.models.LdaModel(corpus=corpus_tfidf, num_topics=k, 
                                                     id2word=dct, random_state=12)
@@ -134,7 +137,7 @@ def negative_LDA_topic_modelling(df_negative):
     pyLDAvis.enable_notebook()
     results = pyLDAvis.gensim_models.prepare(lda_model, corpus_tfidf, dct, sort_topics=False)
     pyLDAvis.save_html(results, 'ldavis_english' +'.html')
-    results
+    #results
 
     top_words_df = pd.DataFrame()
     for k in range(selected_topics):
@@ -143,6 +146,9 @@ def negative_LDA_topic_modelling(df_negative):
         
         # only keep the word and discard the weight
         top_words_df['Topic {}'.format(k+4)] = [pair[0] for pair in top_words]
+    
+    print("Top Words for Each Negative Topics")
+    print(top_words_df)
 
     predicted_topics = lda_model[corpus_tfidf]
 
@@ -157,13 +163,20 @@ def negative_LDA_topic_modelling(df_negative):
 
 
 def full_LDA_topic_modelling(dataframe):
+    """
+    Parameters:
+    dataframe with predicted "Sentiment"
+    
+    Output:
+    Predicted "Topics" column appended 
+    """
     df = dataframe
 
     df_positive = df[df['Sentiment'] == 'positive']
     df_negative = df[df['Sentiment'] == 'negative']
 
     df_positive = positive_LDA_topic_modelling(df_positive)
-    df_negative = negative_LDA_topic_modelling(df_positive)
+    df_negative = negative_LDA_topic_modelling(df_negative)
 
     #combine the positive and negative dataset
     df_result = pd.concat([df_positive, df_negative])
