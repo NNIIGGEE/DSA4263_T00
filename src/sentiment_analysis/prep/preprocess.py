@@ -329,7 +329,7 @@ def clean_data(path, type):
         le = LabelEncoder()
         raw["label"] = le.fit_transform(raw["Sentiment"])
         
-        final_df = raw[['label', 'Time', 'cleaned', 'Text']]
+        final_df = raw[['Sentiment', 'label', 'Time', 'cleaned', 'Text']]
         final_df['cleaned2'] = final_df['cleaned'].apply(lambda x: ' '.join(x))
     else:
         final_df = raw[['Time', 'cleaned', 'Text']]
