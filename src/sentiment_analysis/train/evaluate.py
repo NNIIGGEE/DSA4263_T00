@@ -38,7 +38,7 @@ def get_score(file):
 
     # Prep testing data
     cleaned = preprocess.clean_data(file, "testing")
-    tokenizer = Tokenizer(num_words=2000)
+    tokenizer = Tokenizer(num_words=10000)
     tokenizer.fit_on_texts(cleaned['cleaned2'])
     sequences = tokenizer.texts_to_sequences(cleaned['cleaned2'])
     padded_sequences = pad_sequences(sequences)
@@ -66,7 +66,7 @@ def get_lstm_score(x_test):
     -------
     dataframe with predicted values
     '''
-    tokenizer = Tokenizer(num_words=2000)
+    tokenizer = Tokenizer(num_words=10000)
     tokenizer.fit_on_texts(x_test['cleaned2'])
     sequences = tokenizer.texts_to_sequences(x_test['cleaned2'])
     padded_sequences = pad_sequences(sequences)

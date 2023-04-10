@@ -22,20 +22,18 @@ def run_lstm_training(x_train, x_test, y_train, y_test):
     '''
 
     # Tokenize data
-    tokenizer = Tokenizer(num_words=2000)
+    tokenizer = Tokenizer(num_words=10971) #10971 is the number of unique tokens in our dataset
     tokenizer.fit_on_texts(x_train['cleaned2'])
     sequences = tokenizer.texts_to_sequences(x_train['cleaned2'])
-    padded_sequences = pad_sequences(sequences)
+    padded_sequences = pad_sequences(sequences, maxlen=100)
 
-    tokenizer2 = Tokenizer(num_words=2000)
-    tokenizer2.fit_on_texts(x_test['cleaned2'])
-    sequences2 = tokenizer2.texts_to_sequences(x_test['cleaned2'])
-    padded_sequences2 = pad_sequences(sequences2)
-
+    # Convert test set to sequences using the same tokenizer object
+    sequences2 = tokenizer.texts_to_sequences(x_test['cleaned2'])
+    padded_sequences2 = pad_sequences(sequences2, maxlen=100)
 
     # Build LSTM model
     model = tf.keras.Sequential([
-        tf.keras.layers.Embedding(2000, 64),
+        tf.keras.layers.Embedding(10000, 64),
         tf.keras.layers.LSTM(32),
         tf.keras.layers.Dense(1, activation='sigmoid')
     ])
@@ -44,7 +42,7 @@ def run_lstm_training(x_train, x_test, y_train, y_test):
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
     # Train the model
-    model.fit(padded_sequences, y_train, epochs=10, batch_size=128, validation_data=(padded_sequences2, y_test))
+    model.fit(padded_sequences, y_train, epochs=5, batch_size=128, validation_data=(padded_sequences2, y_test))
     filename = "lstm_partial_SA.pkl"
     path = "../trained_models/" + filename
     joblib.dump(model, path)
@@ -66,14 +64,14 @@ def run_lstm_training_full(data):
     '''
 
     # Tokenize data
-    tokenizer = Tokenizer(num_words=2000)
+    tokenizer = Tokenizer(num_words=10971)
     tokenizer.fit_on_texts(data['cleaned2'])
     sequences = tokenizer.texts_to_sequences(data['cleaned2'])
-    padded_sequences = pad_sequences(sequences)
+    padded_sequences = pad_sequences(sequences, maxlen=100)
 
     # Build LSTM model
     model = tf.keras.Sequential([
-        tf.keras.layers.Embedding(2000, 64),
+        tf.keras.layers.Embedding(10971, 64),
         tf.keras.layers.LSTM(32),
         tf.keras.layers.Dense(1, activation='sigmoid')
     ])
@@ -82,7 +80,7 @@ def run_lstm_training_full(data):
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
     # Train the model
-    model.fit(padded_sequences, data['label'], epochs=10, batch_size=128, validation_split=0.2)
+    model.fit(padded_sequences, data['label'], epochs=5, batch_size=128, validation_split=0.2)
     filename = "lstm_full_SA.pkl"
     path = "../trained_models/" + filename
     joblib.dump(model, path)
