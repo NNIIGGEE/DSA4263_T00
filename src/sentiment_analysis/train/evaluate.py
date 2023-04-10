@@ -54,7 +54,7 @@ def get_score(file):
     final_df.to_csv("../reviews_test_predictions_T00.csv")
     print("Predicted csv has been generated")
 
-def get_lstm_score(x_test):
+def get_lstm_score(x_train, x_test):
     '''
     Gets lstm score for sentiment analysis
 
@@ -66,13 +66,18 @@ def get_lstm_score(x_test):
     -------
     dataframe with predicted values
     '''
-    tokenizer = Tokenizer(num_words=10971)
-    tokenizer.fit_on_texts(x_test['cleaned2'])
-    sequences = tokenizer.texts_to_sequences(x_test['cleaned2'])
+    
+    tokenizer = Tokenizer(num_words=10971) #10971 is the number of unique tokens in our dataset
+    tokenizer.fit_on_texts(x_train['cleaned2'])
+    sequences = tokenizer.texts_to_sequences(x_train['cleaned2'])
     padded_sequences = pad_sequences(sequences, maxlen=100)
 
+    # Convert test set to sequences using the same tokenizer object
+    sequences2 = tokenizer.texts_to_sequences(x_test['cleaned2'])
+    padded_sequences2 = pad_sequences(sequences2, maxlen=100)
+
     model = joblib.load("../trained_models/lstm_partial_SA.pkl")
-    predicted = model.predict(padded_sequences)
+    predicted = model.predict(padded_sequences2)
     final_df = x_test[['Time', 'Text', 'cleaned2']]
     final_df['predicted'] = predicted.round()
     return final_df
