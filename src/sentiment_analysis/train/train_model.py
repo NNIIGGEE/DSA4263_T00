@@ -33,7 +33,7 @@ def run_lstm_training(x_train, x_test, y_train, y_test):
 
     # Build LSTM model
     model = tf.keras.Sequential([
-        tf.keras.layers.Embedding(10000, 64),
+        tf.keras.layers.Embedding(10971, 64),
         tf.keras.layers.LSTM(32),
         tf.keras.layers.Dense(1, activation='sigmoid')
     ])
