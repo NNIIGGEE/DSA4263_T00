@@ -285,34 +285,44 @@ def clean_data(path, type):
 
     '''
     raw = pd.read_csv(path)
+    print("========================READ RAW DATA=======================")
     
     # Lowercase all words
     raw['Text'] = raw['Text'].apply(str.lower)
+    print("=======================LOWERCASE TEXT=======================")
 
     # Tokenize text
     tokenizer = TweetTokenizer()
     raw['tokens'] = raw['Text'].apply(tokenizer.tokenize)
+    print("========================TOKENIZE TEXT=======================")
     
     # Remove Punctuation
     raw['no_punc_1'] = raw['tokens'].apply(remove_punctuation)
+    print("=====================REMOVE PUNCTUATION=====================")
     
     # Remove stopwords using NLTK
     raw['no_stopwords_2'] = raw['no_punc_1'].apply(remove_stopwords)
+    print("======================REMOVE STOPWORDS======================")
     
     # Remove short words
     raw['removed_short_word_3'] = raw['no_stopwords_2'].apply(remove_short_words)
+    print("=====================REMOVE SHORT WORDS=====================")
     
     # Convert Amazon Strings
     raw['converted_strings_4'] = raw['removed_short_word_3'].apply(convert_strings)
+    print("==================CONVERT AMAZON.COM TOKENS=================")
     
     # Remove Contractions
     raw['remove_contractions_5'] = raw['converted_strings_4'].apply(remove_contractions)
+    print("=====================REMOVE CONTRACTIONS====================")
     
     # Remove URLs
     raw['remove_urls_6'] = raw['remove_contractions_5'].apply(remove_urls)
+    print("=====================REMOVE PUNCTUATION=====================")
     
     # Remove Digits 
     raw['remove_digits_7'] = raw['remove_urls_6'].apply(remove_digits)
+    print("========================REMOVE DIGITS=======================")
     
     # Remove Typos
     # raw['remove_typos_8'] = raw['remove_digits_7'].apply(remove_typos)
@@ -320,21 +330,32 @@ def clean_data(path, type):
     # Lemmatization (POSTAG)
     raw['pos_tags'] = raw['remove_digits_7'].apply(nltk.pos_tag) # POSTAG the tokens with NLTK for lemmatization
     raw['lemmatized'] = raw.apply(lambda row: lemmatize_tokens(row['pos_tags']), axis=1)
+    print("======================LEMMATIZE TOKENS======================")
     
     # Remove duplicates from lemmatization
     raw['cleaned'] = raw['lemmatized'].apply(remove_duplicates)
+    print("======================REMOVE DUPLICATES=====================")
     
     if type == "training":
         # labels
         le = LabelEncoder()
         raw["label"] = le.fit_transform(raw["Sentiment"])
+        print("======================APPEND LABELS=========================")
         
         final_df = raw[['Sentiment', 'label', 'Time', 'cleaned', 'Text']]
-        final_df['cleaned2'] = final_df['cleaned'].apply(lambda x: ' '.join(x))
+        final_df.loc[:,'cleaned2'] = final_df.loc[:,'cleaned'].apply(lambda x: ' '.join(x))
     else:
         final_df = raw[['Time', 'cleaned', 'Text']]
-        final_df['cleaned2'] = final_df['cleaned'].apply(lambda x: ' '.join(x))
-
+        final_df.loc[:,'cleaned2'] = final_df.loc[:,'cleaned'].apply(lambda x: ' '.join(x))
+    
+    print("==================DATA PREPROCESSING DONE===================")
+    
+    print("=======================ORIGINAL TEXT========================")
+    print(final_df['Text'].head())
+    
+    print("=====================PREPROCESSED TOKENS====================")
+    print(final_df['cleaned'].head())
+    
     return final_df
 
 def split_data(data):
