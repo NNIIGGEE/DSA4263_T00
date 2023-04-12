@@ -3,7 +3,7 @@ import joblib
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-from sklearn.metrics import accuracy_score, roc_auc_score, precision_score, classification_report
+from sklearn.metrics import accuracy_score, roc_auc_score, precision_score, classification_report, f1_score, recall_score
 
 def get_sentiment(val):
     '''
@@ -80,6 +80,8 @@ def get_lstm_score(x_train, x_test):
     predicted = model.predict(padded_sequences2)
     final_df = x_test[['Time', 'Text', 'cleaned2']]
     final_df['predicted'] = predicted.round()
+    print("=======================LSTM PREDICTIONS========================")
+    print(final_df[['Text','predicted']].head())
     return final_df
 
 def convert_score(row):
@@ -117,11 +119,13 @@ def get_vader_score(x_test):
     final_df = x_test[['Time', 'Text', 'cleaned2']]
     final_df["predicted_polarity"] = final_df["cleaned2"].apply(lambda x: model.polarity_scores(x))
     final_df["predicted"] = final_df["predicted_polarity"].apply(lambda row: convert_score(row))
+    print("=======================VADER PREDICTIONS========================")
+    print(final_df[['Text','predicted']].head())
     return final_df
 
 def evaluate(predicted, y_test):
     '''
-    Gets vader score for sentiment analysis
+    Gets model performance for sentiment analysis
 
     Parameters
     ----------
@@ -130,15 +134,55 @@ def evaluate(predicted, y_test):
 
     Returns
     -------
-    prints out the different metrics
+    prints out the different metrics and get results
     '''
+    results = []
     y_pred = predicted["predicted"]
     accuracy = accuracy_score(y_test, y_pred)
     precision = precision_score(y_test, y_pred)
     auc = roc_auc_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred, average='weighted')
+    recall = recall_score(y_test, y_pred, average='weighted')
+    results.append(accuracy)
+    results.append(precision)
+    results.append(auc)
+    results.append(f1)
+    results.append(recall)
 
     print("Accuracy = ",accuracy)
     print("Precision = ", precision)
     print("ROC AUC = ", auc)
     print(classification_report(y_test, y_pred))
+    return results
 
+def select_best(results1, results2):
+    '''
+    Selects the best model based on various metric
+
+    Parameters
+    ----------
+    results1, results2 : list of the metrics of the different model from evaluation, both lists should be equal length
+
+    Returns
+    -------
+    Shows which model is selected
+    '''
+    metrics = ['accuracy', 'precision', 'ROC AUC', 'Recall', 'F1 score']
+    count1 = 0
+    count2 = 0
+    for i in range(len(results1)):
+        metric = metrics[i]
+        if results1[i] > results2[i]:
+            count1 += 1
+            print("LSTM performed better in", metric)
+        else:
+            count2 += 1
+            print("Vader performed better in", metric)
+    
+    if count1 >= count2:
+        print("LSTM is the better model")
+        return "LSTM"
+    else:
+        print("Vader is the better model")
+        return "Vader"
+    
