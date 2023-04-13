@@ -41,7 +41,7 @@ def get_score(file):
     tokenizer = Tokenizer(num_words=10971)
     tokenizer.fit_on_texts(cleaned['cleaned2'])
     sequences = tokenizer.texts_to_sequences(cleaned['cleaned2'])
-    padded_sequences = pad_sequences(sequences, max_len=100)
+    padded_sequences = pad_sequences(sequences, maxlen=100)
 
     # Load model and predict
     model = joblib.load("../trained_models/lstm_full_SA.pkl")
