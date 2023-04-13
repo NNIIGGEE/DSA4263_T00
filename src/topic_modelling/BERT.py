@@ -17,10 +17,11 @@ from sklearn.feature_extraction.text import CountVectorizer
 from gensim.models.coherencemodel import CoherenceModel
 import gensim.corpora as corpora
 
-def BERT_model(data, type_model = "test"):
+def BERT_model(data_frame, type_model = "train"):
+    print("BERT_model")
 
-    data = data['Text']
-    time = data['Time']   
+    data = data_frame['Text']
+    time = data_frame['Time']   
     data_list = data.to_list()
     time_list = time.to_list()
 
@@ -43,19 +44,22 @@ def BERT_model(data, type_model = "test"):
     '''
 
     if type_model == "train":
+        print("training model")
+        embedding_model = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v2')
 
-        embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+        print('die')
         umap_model = UMAP.UMAP(n_neighbors=3, n_components=3, min_dist=0.05)
         hdbscan_model = HDBSCAN(min_cluster_size=80, min_samples=40,
                             gen_min_span_tree=True,
                             prediction_data=True)
-        
+        print('loaded in')
 
         stopwords = list(stopwords.words('english')) + ['http', 'https', 'amp', 'com']
 
         # we add this to remove stopwords that can pollute topcs
         vectorizer_model = CountVectorizer(ngram_range=(1, 2), stop_words=stopwords)
 
+        print('bert_topic')
         model = BERTopic(
             umap_model=umap_model,
             hdbscan_model=hdbscan_model,
@@ -191,7 +195,3 @@ def BERT_model(data, type_model = "test"):
 
     topic_df = pd.DataFrame.from_dict(model.get_topics())
     return topic_df
-
-
-
-

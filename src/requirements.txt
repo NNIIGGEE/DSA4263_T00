@@ -8,7 +8,10 @@ pandas
 pyLDAvis
 scikit_learn
 seaborn
+transformers
 sentence_transformers
 umap
 umap_learn
 vaderSentiment
+fastapi
+uvicorn
