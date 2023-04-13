@@ -3,9 +3,7 @@ import numpy as np
 from sklearn.cluster import KMeans
 import gensim
 from gensim.models import Phrases
-#Prepare objects for LDA gensim implementation
 from gensim import corpora
-#Running LDA
 from gensim import models
 import ast
 import matplotlib.pyplot as plt
@@ -18,20 +16,27 @@ import pyLDAvis.gensim_models
 """ --- POSITIVE --- """
 
 def positive_LDA_topic_modelling(df_positive):
+    '''
+    Performs topic modeling on positive sentiments
 
-    tokens = []
-    for sentence in df_positive['cleaned']:
-        tokens.append(ast.literal_eval(sentence))
+    Parameters
+    ----------
+    df_positive: data with positive sentiment
+
+    Returns
+    -------
+    data with predicted topics
+    '''
 
     # training a bi gram model in order to include those bigrams as tokens who occured at least 6 times
     # in the whole dataset
-    bigram = gensim.models.Phrases(tokens, min_count=2, threshold=100)
+    bigram = gensim.models.Phrases(df_positive['cleaned'], min_count=2, threshold=100)
     bigram_mod = gensim.models.phrases.Phraser(bigram)
     
     # including bigrams as tokens 
-    sents = [ bigram_mod[token] for token in tokens]
+    sents = [ bigram_mod[token] for token in df_positive['cleaned']]
     # Create Dictionary to keep track of vocab
-    dct = corpora.Dictionary(tokens)
+    dct = corpora.Dictionary(df_positive['cleaned'])
 
     # Create Corpus(Database)
     corpus = [dct.doc2bow(sent) for sent in sents]
@@ -57,10 +62,12 @@ def positive_LDA_topic_modelling(df_positive):
     selected_topics=4
     lda_model = gensim.models.LdaModel(corpus=corpus_tfidf, id2word=dct, num_topics=selected_topics,\
                                             random_state=12, chunksize=128, passes=10 )
+    
+    lda_model.save("../trained_models/lda_pos.model")
 
     pyLDAvis.enable_notebook()
     results = pyLDAvis.gensim_models.prepare(lda_model, corpus_tfidf, dct, sort_topics=False)
-    pyLDAvis.save_html(results, 'ldavis_english' +'.html')
+    pyLDAvis.save_html(results, 'ldavis_english_pos' +'.html')
     
     #results
     top_words_df = pd.DataFrame()
@@ -87,19 +94,26 @@ def positive_LDA_topic_modelling(df_positive):
 """ --- NEGATIVE --- """
 
 def negative_LDA_topic_modelling(df_negative):
+    '''
+    Performs topic modeling on negative sentiments
 
-    tokens = []
-    for sentence in df_negative['cleaned']:
-        tokens.append(ast.literal_eval(sentence))
+    Parameters
+    ----------
+    df_positive: data with negative sentiment
 
-        # training a bi gram model in order to include those bigrams as tokens who occured at least 6 times
-        # in the whole dataset
-        bigram = gensim.models.Phrases(tokens, min_count=2, threshold=100)
-        bigram_mod = gensim.models.phrases.Phraser(bigram)
-        # including bigrams as tokens 
-        sents = [ bigram_mod[token] for token in tokens]
-        # Create Dictionary to keep track of vocab
-        dct = corpora.Dictionary(tokens)
+    Returns
+    -------
+    data with predicted topics
+    '''
+
+    # training a bi gram model in order to include those bigrams as tokens who occured at least 6 times
+    # in the whole dataset
+    bigram = gensim.models.Phrases(df_negative['cleaned'], min_count=2, threshold=100)
+    bigram_mod = gensim.models.phrases.Phraser(bigram)
+    # including bigrams as tokens 
+    sents = [ bigram_mod[token] for token in df_negative['cleaned']]
+    # Create Dictionary to keep track of vocab
+    dct = corpora.Dictionary(df_negative['cleaned'])
 
     print('Unique words before filtering/after pre-processing', len(dct))
 
@@ -130,9 +144,10 @@ def negative_LDA_topic_modelling(df_negative):
     lda_model = gensim.models.LdaModel(corpus=corpus_tfidf, id2word=dct, num_topics=selected_topics,\
                                             random_state=12, chunksize=128, passes=10 )
 
+    lda_model.save("../trained_models/lda_neg.model")
     pyLDAvis.enable_notebook()
     results = pyLDAvis.gensim_models.prepare(lda_model, corpus_tfidf, dct, sort_topics=False)
-    pyLDAvis.save_html(results, 'ldavis_english' +'.html')
+    pyLDAvis.save_html(results, 'ldavis_english_neg' +'.html')
     #results
 
     top_words_df = pd.DataFrame()
@@ -160,13 +175,18 @@ def negative_LDA_topic_modelling(df_negative):
 
 
 def full_LDA_topic_modelling(dataframe):
-    """
-    Parameters:
-    dataframe with predicted "Sentiment"
-    
-    Output:
-    Predicted "Topics" column appended 
-    """
+    '''
+    Gets full dataframe with predicted topics
+
+    Parameters
+    ----------
+    dataframe: preprocessed dataframe with sentiment
+
+    Returns
+    -------
+    dataframe with predicted topics
+    '''
+
     df = dataframe
 
     df_positive = df[df['Sentiment'] == 'positive']
@@ -181,10 +201,17 @@ def full_LDA_topic_modelling(dataframe):
     return df_result
 
 def visualise_sentiments(df):
-    """
-    PARAMETER: df with sentiments and topics appended
-    OUTPUT: Visualisations for sentiments
-    """
+    '''
+    Performs visualisation on the sentiments
+
+    Parameters
+    ----------
+    df: dataframe with sentiments and topics appended
+
+    Returns
+    -------
+    Visualisations for sentiments
+    '''
     
     """FREQUENCY OF SENTIMENTS OVER EACH YEAR"""
     # Topic Frequency by month
@@ -226,13 +253,19 @@ def visualise_sentiments(df):
     return
 
 def visualise_topics(df):
-    """
-    PARAMETER: df with sentiments and topics appended
-    OUTPUT: Visualisations for topics
-    """
-    
-    """FREQUENCY OF TOPICS OVER EACH YEAR"""
+    '''
+    Performs visualisation on the topics
 
+    Parameters
+    ----------
+    df: dataframe with sentiments and topics appended
+
+    Returns
+    -------
+    Visualisations for topics
+    '''
+    
+    """FREQUENCY OF SENTIMENTS OVER EACH YEAR"""
 
     df['Time'] = pd.to_datetime(df['Time'])
     df['year'] = df['Time'].dt.year
