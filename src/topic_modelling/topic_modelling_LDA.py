@@ -54,8 +54,6 @@ def positive_LDA_topic_modelling(df_positive):
         scores.append(coherence_lda)
 
     #chosen number of topic = 4 as the intertopic distance map shows a better result than 5 topics (topic 1 and 5 are relatively close tgt which means they're similar)
-    import pyLDAvis.gensim_models
-
     selected_topics=4
     lda_model = gensim.models.LdaModel(corpus=corpus_tfidf, id2word=dct, num_topics=selected_topics,\
                                             random_state=12, chunksize=128, passes=10 )
@@ -63,8 +61,8 @@ def positive_LDA_topic_modelling(df_positive):
     pyLDAvis.enable_notebook()
     results = pyLDAvis.gensim_models.prepare(lda_model, corpus_tfidf, dct, sort_topics=False)
     pyLDAvis.save_html(results, 'ldavis_english' +'.html')
+    
     #results
-
     top_words_df = pd.DataFrame()
     for k in range(selected_topics):
         # top words with it's weight for a given id k 
@@ -80,16 +78,15 @@ def positive_LDA_topic_modelling(df_positive):
     # Extract the predicted topic for each document
     predicted_topics = [max(prob, key=lambda x: x[1])[0] for prob in predicted_topics]
 
-
     # Append the predicted topics to the DataFrame
     df_positive['Topics'] = predicted_topics
+    print(df_positive.head())
     return df_positive
 
 
 """ --- NEGATIVE --- """
 
 def negative_LDA_topic_modelling(df_negative):
-   
 
     tokens = []
     for sentence in df_negative['cleaned']:
@@ -103,7 +100,6 @@ def negative_LDA_topic_modelling(df_negative):
         sents = [ bigram_mod[token] for token in tokens]
         # Create Dictionary to keep track of vocab
         dct = corpora.Dictionary(tokens)
-
 
     print('Unique words before filtering/after pre-processing', len(dct))
 
@@ -130,8 +126,6 @@ def negative_LDA_topic_modelling(df_negative):
     selected_topics = np.argmax(scores)+3
 
     #chosen number of topic = 4 for negative sentiments
-    import pyLDAvis.gensim_models
-
     selected_topics=4
     lda_model = gensim.models.LdaModel(corpus=corpus_tfidf, id2word=dct, num_topics=selected_topics,\
                                             random_state=12, chunksize=128, passes=10 )
@@ -157,9 +151,10 @@ def negative_LDA_topic_modelling(df_negative):
     # Extract the predicted topic for each document
     predicted_topics = [(max(prob, key=lambda x: x[1])[0] + 4) for prob in predicted_topics]
 
-
     # Append the predicted topics to the DataFrame
     df_negative['Topics'] = predicted_topics
+
+    print(df_negative.head())
 
     return df_negative
 
