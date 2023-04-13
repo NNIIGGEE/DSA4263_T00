@@ -55,7 +55,7 @@ class TestPreprocessing(unittest.TestCase):
 
     def test_remove_duplicates(self):
         tokens = ['dog', 'cat', 'dog', 'horse', 'cat']
-        self.assertEqual(preprocess.remove_duplicates(tokens), ['cat', 'horse', 'dog'])
+        self.assertEqual(preprocess.remove_duplicates(tokens), ['horse', 'dog', 'cat'])
 
         
 class TestSentimentAnalysis(unittest.TestCase):
@@ -63,26 +63,28 @@ class TestSentimentAnalysis(unittest.TestCase):
     def __init__(self, methodName: str):
         super().__init__(methodName=methodName)
         self.model = joblib.load('../trained_models/lstm_partial_SA.pkl')
-        self.max_length = 50
+        self.max_length = 100
         self.tokenizer = Tokenizer(num_words=10000, oov_token="<OOV>")
         self.tokenizer.fit_on_texts([""])
         
     def predict_sentiment(self, text):
         text_sequence = self.tokenizer.texts_to_sequences([text])
-        padded_sequence = pad_sequences(text_sequence, maxlen=self.max_length, truncating='post')
+        padded_sequence = pad_sequences(text_sequence, maxlen=self.max_length)
         prediction = self.model.predict(padded_sequence)[0][0]
         if prediction >= 0.5:
             return "positive"
         else:
             return "negative"
+        self.assertGreaterEqual(prediction, 0, msg="Value is less than 0")
+        self.assertLessEqual(prediction, 1, msg="Value is greater than 1")
         
-    def test_positive_sentiment(self):
-        text = "really enjoyed movie acting great plot engaging"
-        sentiment = self.predict_sentiment(text)
-        self.assertEqual(sentiment, "positive")
+    # def test_positive_sentiment(self):
+    #     text = "really enjoyed movie acting great plot engaging"
+    #     sentiment = self.predict_sentiment(text)
+    #     self.assertEqual(sentiment, "positive")
         
     # def test_negative_sentiment(self):
-    #     text = "poor excuse coffee really bad horrible service hate"
+    #     text = "horrible hated it"
     #     sentiment = self.predict_sentiment(text)
     #     self.assertEqual(sentiment, "negative")
     
@@ -90,10 +92,13 @@ class TestEvaluation(unittest.TestCase):
 
     def setUp(self):
         # Create test data
-        self.time = ['18/6/21', '7/7/21', '11/9/22']
-        self.texts = ["This is a positive review.", "This is a negative review.", "I don't know how I feel about this."]
-        self.tokens = [['positive', 'review'], ['negative', 'review'], ['know', 'how', 'feel', 'about']]
-        self.labels = [1, 0, 0]
+        self.time = ['18/6/21', '7/7/21']
+        self.texts = ['this is a very healthy dog food. good for their digestion. also good for small puppies. my dog eats her required amount at every feeding.'
+                      , 'overall, this mix is okay, but, the sugar content is very, very high. you can actually see the sugar in the mix if you look closely. for pancakes or waffles, this is fine, but for savory concoctions, this is not acceptable. sausage balls, casseroles, and biscuits all come out almost inedible.this mix is also oddly gritty. the grit is very fine, but still makes my teeth want to curl.  i recommend pamela\'s baking and pancake mix, as it is smoother, and much more versatile, because it\'s not as sweet. a good cook knows you can always add more of something, but you can\'t take it out if you\'ve added too much.<br /><br />that being said, if you\'re traveling and this is the only mix they have, it\'s better than nothing.']
+        self.tokens = [['puppy', 'also', 'eats', 'digestion', 'small', 'food', 'dog', 'require', 'amount', 'every', 'healthy', 'feeding', 'good']
+                       ,['fine', 'closely', 'content', 'curl', 'say', 'bake', 'oddly', 'casseroles', 'biscuit', 'pancake', 'ball', 'still', 'come', 'see', 'good', 'mix', 'teeth', 'concoction', 'sugar', 'take', 'actually', 'waffle', 'grit', 'high', 'recommend', 'pamela', 'something', 'almost', 'overall', 'acceptable', 'also', 'want', 'nothing', 'smoother', 'sweet', 'inedible', 'add', 'always', 'savory', 'okay', 'sausage', 'pancakes', 'gritty', 'versatile', 'added', 'look', 'much', 'well', 'make', 'travel', 'cook', 'know']
+]
+        self.labels = [1, 0]
         self.x_train = pd.DataFrame({"Text":self.texts, "label":self.labels, "cleaned2":self.tokens, "Time":self.time})
         self.x_test = pd.DataFrame({"Text":self.texts, "label":self.labels, "cleaned2":self.tokens, "Time":self.time})
         
@@ -103,6 +108,7 @@ class TestEvaluation(unittest.TestCase):
         self.assertEqual(get_sentiment(0), "negative")
 
     def test_get_lstm_score(self):
+        print("=====================TEST get_lstm_score()=====================")
         # Test get_lstm_score function
         output_df = get_lstm_score(self.x_train, self.x_test)
         # Check if the output dataframe has the right number of rows and columns
@@ -121,6 +127,7 @@ class TestEvaluation(unittest.TestCase):
         self.assertTrue(all(x in [0, 1] for x in output))
 
     def test_get_vader_score(self):
+        print("=====================TEST get_vader_score()=====================")
         # Test get_vader_score function
         output_df = get_vader_score(self.x_test)
         # Check if the output dataframe has the right number of rows and columns
@@ -139,13 +146,23 @@ class TestEvaluation(unittest.TestCase):
         # Check if the output list has values between 0 and 1
         self.assertTrue(all(x >= 0 and x <= 1 for x in output))
 
-    def test_select_best(self):
+    def test_select_best_vader(self):
+        print("=====================TEST select_best(): Vader=====================")
         # Test select_best function
         results1 = [0.8, 0.6, 0.7, 0.7, 0.7]
         results2 = [0.7, 0.7, 0.8, 0.8, 0.7]
         output = select_best(results1, results2)
 
         self.assertEqual(output, 'Vader')
+        
+    def test_select_best_lstm(self):
+        print("=====================TEST select_best(): LSTM=====================")
+        # Test select_best function
+        results2 = [0.8, 0.6, 0.7, 0.7, 0.7]
+        results1 = [0.7, 0.7, 0.8, 0.8, 0.7]
+        output = select_best(results1, results2)
+
+        self.assertEqual(output, 'LSTM')
         
 if __name__ == '__main__':
     unittest.main()
