@@ -1,0 +1,12 @@
+version: '3'
+services:
+  redis-server:
+    image: 'redis'
+  flask-app:
+    build:
+      context: .
+      dockerfile: rf-new
+    ports:
+      - "5000:5000"
+    restart: always
+

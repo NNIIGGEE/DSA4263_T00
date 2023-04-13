@@ -17,7 +17,6 @@ from sklearn.feature_extraction.text import CountVectorizer
 from gensim.models.coherencemodel import CoherenceModel
 import gensim.corpora as corpora
 
-
 def BERT_model(data, type_model = "test"):
 
     data = data['Text']

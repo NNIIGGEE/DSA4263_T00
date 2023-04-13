@@ -1,0 +1,14 @@
+
+bertopic
+hdbscan
+joblib
+matplotlib
+nltk
+pandas
+pyLDAvis
+scikit_learn
+seaborn
+sentence_transformers
+umap
+umap_learn
+vaderSentiment
