@@ -22,7 +22,7 @@ def run_lstm_training(x_train, x_test, y_train, y_test):
     '''
 
     # Tokenize data
-    tokenizer = Tokenizer(num_words=10971) #10971 is the number of unique tokens in our dataset
+    tokenizer = Tokenizer(num_words=10000)
     tokenizer.fit_on_texts(x_train['cleaned2'])
     sequences = tokenizer.texts_to_sequences(x_train['cleaned2'])
     padded_sequences = pad_sequences(sequences, maxlen=100)
@@ -33,7 +33,7 @@ def run_lstm_training(x_train, x_test, y_train, y_test):
 
     # Build LSTM model
     model = tf.keras.Sequential([
-        tf.keras.layers.Embedding(10971, 64),
+        tf.keras.layers.Embedding(10000, 64),
         tf.keras.layers.LSTM(32),
         tf.keras.layers.Dense(1, activation='sigmoid')
     ])
@@ -64,14 +64,14 @@ def run_lstm_training_full(data):
     '''
 
     # Tokenize data
-    tokenizer = Tokenizer(num_words=10971)
+    tokenizer = Tokenizer(num_words=10000)
     tokenizer.fit_on_texts(data['cleaned2'])
     sequences = tokenizer.texts_to_sequences(data['cleaned2'])
     padded_sequences = pad_sequences(sequences, maxlen=100)
 
     # Build LSTM model
     model = tf.keras.Sequential([
-        tf.keras.layers.Embedding(10971, 64),
+        tf.keras.layers.Embedding(10000, 64),
         tf.keras.layers.LSTM(32),
         tf.keras.layers.Dense(1, activation='sigmoid')
     ])

@@ -38,7 +38,7 @@ def get_score(file):
 
     # Prep testing data
     cleaned = preprocess.clean_data(file, "testing")
-    tokenizer = Tokenizer(num_words=10971)
+    tokenizer = Tokenizer(num_words=10000)
     tokenizer.fit_on_texts(cleaned['cleaned2'])
     sequences = tokenizer.texts_to_sequences(cleaned['cleaned2'])
     padded_sequences = pad_sequences(sequences, maxlen=100)
@@ -67,7 +67,7 @@ def get_lstm_score(x_train, x_test):
     dataframe with predicted values
     '''
     
-    tokenizer = Tokenizer(num_words=10971) #10971 is the number of unique tokens in our dataset
+    tokenizer = Tokenizer(num_words=10000) #10971 is the number of unique tokens in our dataset
     tokenizer.fit_on_texts(x_train['cleaned2'])
     sequences = tokenizer.texts_to_sequences(x_train['cleaned2'])
     padded_sequences = pad_sequences(sequences, maxlen=100)
