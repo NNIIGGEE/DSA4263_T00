@@ -223,6 +223,7 @@ def visualise_sentiments(df):
         plt.plot(df_pivot.index.astype("string"), df_pivot[topic], label=topic)
     plt.title('Frequency of Sentiments by 4-Month Period')
     plt.xlabel('4-Month Period')
+    plt.xticks(rotation=90)
     plt.ylabel('Frequency')
     plt.legend()
     plt.show()
@@ -254,6 +255,7 @@ def visualise_topics(df):
         axs[i].set_ylabel('Frequency')
         axs[i].legend(df_pivot.columns)
         axs[i].set_ylim([0, 370])
+        
 
     plt.tight_layout()
     plt.show()
@@ -269,6 +271,7 @@ def visualise_topics(df):
         plt.plot(df_pivot.index.astype("string"), df_pivot[topic], label=topic)
     plt.title('Frequency of Topics by 4-Month Period')
     plt.xlabel('4-Month Period')
+    plt.xticks(rotation=90)
     plt.ylabel('Frequency')
     plt.legend()
     plt.show()
