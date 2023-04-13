@@ -10,6 +10,7 @@ from gensim import models
 import ast
 import matplotlib.pyplot as plt
 import seaborn as sns
+from datetime import datetime
 import gensim.corpora as corpora
 from gensim.models import CoherenceModel
 import pyLDAvis.gensim_models
@@ -183,4 +184,95 @@ def full_LDA_topic_modelling(dataframe):
     df_result = pd.concat([df_positive, df_negative])
 
     return df_result
+
+def visualise_sentiments(df):
+    """
+    PARAMETER: df with sentiments and topics appended
+    OUTPUT: Visualisations for sentiments
+    """
+    
+    """FREQUENCY OF SENTIMENTS OVER EACH YEAR"""
+    # Topic Frequency by month
+    df['Time'] = pd.to_datetime(df['Time'])
+    df['year'] = df['Time'].dt.year
+    df['month'] = df['Time'].dt.month
+
+    df_grouped = df.groupby(['year','month', 'Sentiment']).size().reset_index(name='frequency')
+    df_pivot = df_grouped.pivot(index=['year', 'month'], columns='Sentiment', values='frequency').fillna(0)
+    fig, axs = plt.subplots(nrows=len(df['year'].unique()), ncols=1, figsize=(8, 3*len(df['year'].unique())), sharex=True)
+
+    for i, year in enumerate(df['year'].unique()):
+        axs[i].plot(df_pivot.loc[year].index.astype("string"), df_pivot.loc[year].values)
+        axs[i].set_title(f"Frequency of Sentiments by Month for {year}")
+        axs[i].set_xlabel('Month')
+        axs[i].set_ylabel('Frequency')
+        axs[i].legend(df_pivot.columns)
+        axs[i].set_ylim([0, 370])
+
+    plt.tight_layout()
+    plt.show()
+    
+    """FREQUENCY OF SENTIMENTS FOR EACH QUARTER"""
+    # Topic Frequency by Quarter
+
+    df['year_quarter'] = pd.PeriodIndex(df['Time'], freq='Q')
+
+    df_grouped = df.groupby(['year_quarter', 'Sentiment']).size().reset_index(name='frequency')
+    df_pivot = df_grouped.pivot(index='year_quarter', columns='Sentiment', values='frequency').fillna(0)
+    for topic in df['Sentiment'].unique():
+        plt.plot(df_pivot.index.astype("string"), df_pivot[topic], label=topic)
+    plt.title('Frequency of Sentiments by 4-Month Period')
+    plt.xlabel('4-Month Period')
+    plt.ylabel('Frequency')
+    plt.legend()
+    plt.show()
+    
+    return
+
+def visualise_topics(df):
+    """
+    PARAMETER: df with sentiments and topics appended
+    OUTPUT: Visualisations for topics
+    """
+    
+    """FREQUENCY OF TOPICS OVER EACH YEAR"""
+
+
+    df['Time'] = pd.to_datetime(df['Time'])
+    df['year'] = df['Time'].dt.year
+    df['month'] = df['Time'].dt.month
+
+    df_grouped = df.groupby(['year','month', 'Topics']).size().reset_index(name='frequency')
+    df_pivot = df_grouped.pivot(index=['year', 'month'], columns='Topics', values='frequency').fillna(0)
+
+    fig, axs = plt.subplots(nrows=len(df['year'].unique()), ncols=1, figsize=(8, 3*len(df['year'].unique())), sharex=True)
+
+    for i, year in enumerate(df['year'].unique()):
+        axs[i].plot(df_pivot.loc[year].index.astype("string"), df_pivot.loc[year].values)
+        axs[i].set_title(f"Frequency of Topics by Month for {year}")
+        axs[i].set_xlabel('Month')
+        axs[i].set_ylabel('Frequency')
+        axs[i].legend(df_pivot.columns)
+        axs[i].set_ylim([0, 370])
+
+    plt.tight_layout()
+    plt.show()
+    
+    """FREQUENCY OF TOPICS OVER EACH QUARTER"""
+    # Topic Frequency by Quarter
+
+    df['year_quarter'] = pd.PeriodIndex(df['Time'], freq='Q')
+
+    df_grouped = df.groupby(['year_quarter', 'Topics']).size().reset_index(name='frequency')
+    df_pivot = df_grouped.pivot(index='year_quarter', columns='Topics', values='frequency').fillna(0)
+    for topic in df['Topics'].unique():
+        plt.plot(df_pivot.index.astype("string"), df_pivot[topic], label=topic)
+    plt.title('Frequency of Topics by 4-Month Period')
+    plt.xlabel('4-Month Period')
+    plt.ylabel('Frequency')
+    plt.legend()
+    plt.show()
+    
+    return
+    
    
