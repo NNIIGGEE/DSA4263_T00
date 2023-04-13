@@ -26,16 +26,21 @@ def BERT_model(data, type_model = "test"):
     time_list = time.to_list()
 
     '''
-        You might notice that we have added prediction_data=True as a new parameter to HDBSCAN. We need this to avoid an AttributeError when integrating our custom HDBSCAN step with BERTopic. Adding gen_min_span_tree adds another step to HDBSCAN that can improve the resultant clusters.
-        We must also initialize a vectorizer_model to handle stopword removal during the c-TF-IDF step. We will use the list of stopwords from NLTK but add a few more tokens that seem to pollute the results.
+        Import all-MiniLM-L6-v2 pretrained model
+        Then added prediction_data=True as a new parameter to HDBSCAN. 
+        We need this to avoid an AttributeError when integrating our custom HDBSCAN step with BERTopic.
+        Adding gen_min_span_tree adds another step to HDBSCAN that can improve the resultant clusters.
+        We must also initialize a vectorizer_model to handle stopword removal during the c-TF-IDF step. 
+        We will use the list of stopwords from NLTK.
+        ensemble a few models to topic model the dataset
 
         Parameters
         ----------
-        data : Takes in cleaned dataframe, data should have 5 columns -> label, time, cleaned, text and cleaned2
+        data : Takes in reviews.csv dataframe, data should have 3 columns -> sentiment, time, text.
 
         Returns
         -------
-        Save trained model
+        topics split into top 10 words per topic
     '''
 
     if type_model == "train":

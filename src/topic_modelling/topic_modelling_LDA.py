@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import gensim.corpora as corpora
 from gensim.models import CoherenceModel
+import pyLDAvis.gensim_models
 
 """ --- POSITIVE --- """
 
