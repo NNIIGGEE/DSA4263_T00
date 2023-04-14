@@ -1,4 +1,3 @@
-
 bertopic
 hdbscan
 joblib
@@ -15,3 +14,5 @@ umap_learn
 vaderSentiment
 fastapi
 uvicorn
+flask
+numpy
