@@ -276,7 +276,7 @@ def clean_data(path, type):
 
     Parameters
     ----------
-    path : Takes in path of raw data
+    path : Takes in path of raw data or file
     type : Training data or Test data (reviews_test.csv)
 
     Returns
