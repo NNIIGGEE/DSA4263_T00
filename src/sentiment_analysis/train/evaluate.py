@@ -1,4 +1,4 @@
-from sentiment_analysis.prep import preprocess
+from ..prep import preprocess
 import joblib
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
@@ -29,7 +29,7 @@ def get_score(file):
 
     Parameters
     ----------
-    file : path of file with testing data
+    file : path of file with testing data or file object
 
     Returns
     -------
@@ -53,6 +53,39 @@ def get_score(file):
     final_df = cleaned[['Text', 'Time', 'predicted_sentiment_probability', 'predicted_sentiment']]
     final_df.to_csv("../reviews_test_predictions_GROUPT00.csv")
     print("Predicted csv has been generated")
+
+def test_get_score(file):
+    '''
+    Gets prediction for sentiment analysis to be used in flask api
+
+    Parameters
+    ----------
+    file : path of file with testing data or file object
+
+    Returns
+    -------
+    CSV file with predicted sentiment probabilities
+    '''
+
+    # Prep testing data
+    cleaned = preprocess.clean_data(file, "testing")
+    tokenizer = Tokenizer(num_words=10000)
+    tokenizer.fit_on_texts(cleaned['cleaned2'])
+    sequences = tokenizer.texts_to_sequences(cleaned['cleaned2'])
+    padded_sequences = pad_sequences(sequences, maxlen=100)
+
+    # Load model and predict
+    model = joblib.load("./trained_models/lstm_full_SA.pkl")
+    predicted = model.predict(padded_sequences)
+    cleaned['predicted'] = predicted.round()
+    cleaned['predicted_sentiment'] = cleaned["predicted"].apply(lambda row: get_sentiment(row))
+    cleaned['predicted_sentiment_probability'] = predicted
+
+    final_df = cleaned[['Text', 'Time', 'predicted_sentiment_probability', 'predicted_sentiment']]
+    final_df.to_csv("./reviews_test_predictions_GROUPT00.csv")
+    final_df.to_html()
+    print("Predicted csv has been generated")
+    return final_df
 
 def get_lstm_score(x_train, x_test):
     '''
