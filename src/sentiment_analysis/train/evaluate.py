@@ -51,7 +51,7 @@ def get_score(file):
     cleaned['predicted_sentiment_probability'] = predicted
 
     final_df = cleaned[['Text', 'Time', 'predicted_sentiment_probability', 'predicted_sentiment']]
-    final_df.to_csv("../reviews_test_predictions_T00.csv")
+    final_df.to_csv("../reviews_test_predictions_GROUPT00.csv")
     print("Predicted csv has been generated")
 
 def get_lstm_score(x_train, x_test):
