@@ -1,6 +1,4 @@
-bertopic
 Flask
-gensim
 joblib
 matplotlib
 nltk
@@ -8,8 +6,6 @@ numpy
 pandas
 Pillow
 pip
-plotly
-pyLDAvis
 requests
 scikit-learn
 seaborn
