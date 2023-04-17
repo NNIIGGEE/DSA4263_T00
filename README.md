@@ -11,7 +11,7 @@ To get the predictions:
 - Add file to repo, add in the path as the parameter to the function and simply run the cell. A csv file named "reviews_test_predictions_GROUPT00.csv" will be created.
 
 ## Use our API
-NIGEL ADD UR DOCS HERE
+Local deployment, as shown through the presentation.
 
 ## Running training pipelines
 ### Sentiment Analysis training pipeline
