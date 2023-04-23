@@ -1,8 +1,9 @@
 # DSA4263_T00
 Final project DSA4263
 
+
 ## This project seeks to
-Perform sentiment analysis and topic modeling on customer reviews. LSTM model is used to then predict the sentiments of the different reviews. Whereas LDA model finds the topics and generate insights for the different topics.
+Develop an end-end solution for Voice of Customer analysis to provide insights to end business users using a public customer feedback dataset. We applied differnt sentiment analysis tools including sentiment analysis and topic modeling. The LSTM model is used to predict the sentiments while LDA model was implemented to generate the different topics
 
 ## See full project
 Use preferred method to open VOC.ipynb file. The notebook runs the 2 training pipelines and display the insights gathered. It also has a function get_score that takes in new data in csv format and performs predictions on the data.
