@@ -3,7 +3,7 @@ Final project DSA4263
 
 
 ## This project seeks to
-Develop an end-end solution for Voice of Customer analysis to provide insights to end business users using a public customer feedback dataset. We applied differnt sentiment analysis tools including sentiment analysis and topic modeling. The LSTM model is used to predict the sentiments while LDA model was implemented to generate the different topics
+Develop an end-end solution for Voice of Customer analysis to provide insights to end business users using a public customer feedback dataset. We applied differnt data sciencetools including sentiment analysis and topic modeling. The LSTM model is used to predict the sentiments while LDA model was implemented to generate the different topics
 
 ## See full project
 Use preferred method to open VOC.ipynb file. The notebook runs the 2 training pipelines and display the insights gathered. It also has a function get_score that takes in new data in csv format and performs predictions on the data.
